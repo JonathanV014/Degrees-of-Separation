@@ -100,29 +100,30 @@ def shortest_path(source, target):
     path = []
     explored = set()
 
-    # print(f"Source: {source}")
-    # print(f"\nTarget: {target}")
-    # print(f"\nPeople: {people}")
-    # print(f"\nMovies: {movies}")
-    # print(f"\nNames: {names}")
-    # print(f"\nNeighbor: {neighbors_for_person(source)}")
-
     while frontier.empty() == False:
 
         node = frontier.remove()
         num_explored += 1
 
         if node.state == target:
-            pearson = people[f'{node.state}']
-            movies_pearson = pearson['movies']
-            solution = None
-            if len(movies_pearson) > 0:
-                movs = list(movies_pearson)
-                solution = (movs[0], target)
-                path.append(solution)
-                return path
-            else:
-                return None
+            actions = []
+            cells = []
+            while node.parent is not None:
+                actions.append(node.action)
+                cells.append(node.state)
+                node = node.parent
+            actions.reverse()
+            cells.reverse()
+            for i in range(len(actions)):
+                path.append((actions[i], cells[i]))
+            return path
+
+        explored.add(node.state)
+
+        for movie_id, person_id in neighbors_for_person(node.state):
+            if not frontier.contains_state(person_id) and person_id not in explored:
+                child = Node(state = person_id, parent = node, action = movie_id) 
+                frontier.add(child)
 
 def person_id_for_name(name):
     """
